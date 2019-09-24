@@ -3,11 +3,13 @@ TDD是一种增量式软件开发技术，简单来说，就是在没有失败�
 
 重构：就是在不改变当前外部行为的条件下对现有代码结构进行修改的过程。其目的式通过写易于理解/演化并且易于我们维护的代码使得工作简单。
 
-本例子演示了如何对嵌入式设备（NUCLEO-F103RB）编写UT，本例子的sample code是假设：
+本例子演示了如何在trueStudio IDE中对嵌入式设备（NUCLEO-F103RB）编写UT，本例子的sample code是假设：
 CppUTest source放置C:\prog\cpputest-3.8， 生成的libCppUTest.a放在C:\prog\cpputest-3.8\lib4nucleof103
 
 下面将各个涉及步骤说明如下。 本demo参考了[搭配Atollic TrueSTUDIO尝试CppUTest](https://qiita.com/tk23ohtani/items/1f1cc4b9fa58a04f520c)
 
+补充： 如果不使用CppUTest TDD框架，只用ITM输出来进行调试，那么本说明后半部分中演示的如何改造_write,启用SWV的方法也是可以参考的。
+对F103RB这种RAM小的设备，要不是在flash中执行TDD，要不是在RAM中运行不使用CppUTest，改为仅采用ITM,通过 printf输出调试结果。
 
 the first step was to build a library libCppUTest.a
 
@@ -61,8 +63,8 @@ now to crate a test project
     ```text
     stm32f4_ram.ld
     /* Generate a link error if heap and stack don't fit into RAM */
-    _Min_Heap_Size  =  0x2000 ;  / *required amount of heap* / 
-    _Min_Stack_Size  =  0x400 ;  / *required amount of stack* /
+    _Min_Heap_Size  =  0x2000 ;  / *required amount of heap  8k* / 
+    _Min_Stack_Size  =  0x400 ;  / *required amount of stack 1K* /
     ```
 
 14. in debugger configuration (run -> debug configuration), new a lanuch configuration in "embedded c/c++ application".  enable SWV and set the core frequency to core frequency of your MCU
