@@ -11,9 +11,6 @@ CppUTest source放置C:\prog\cpputest-3.8， 生成的libCppUTest.a放在C:\prog
 
 the first step was to build a library libCppUTest.a
 
-
-
-
 1. git clone the latest cppUTest release
 2. create a new static library in Atollic
 3. file -> new -> c++ project -> static library -> embedded c++ library  using atollic ARM tools toolchains
@@ -36,6 +33,7 @@ now to crate a test project
 1. file -> new -> c++ project -> embedded c++ project 
 2. select your target hardware ( e.g. nucleo-F103RB BOARD). it should match to libcpputest.a's target hardware, 
    如果是类似F4xx， RAM比较大的，建议选择RUN IN RAM.因为目的是TDD，则应经常对其进行测试，而对类似nucleof103RB板子，只有20KBRAM， 一个最基本带TEST的application都要编译到62KB，所以103板子在UTEST情况下玩RAM不合适。
+   
 3. uncheck "disable c++ exception handlling"
 4. check generate system calls file (enable I/O..)
 5. select your debugging tool (st-link in my case)
