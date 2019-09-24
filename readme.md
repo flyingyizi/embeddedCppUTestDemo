@@ -3,7 +3,7 @@ TDD是一种增量式软件开发技术，简单来说，就是在没有失败�
 
 重构：就是在不改变当前外部行为的条件下对现有代码结构进行修改的过程。其目的式通过写易于理解/演化并且易于我们维护的代码使得工作简单。
 
-本例子演示了如何在trueStudio IDE中对嵌入式设备（NUCLEO-F103RB）编写UT，本例子的sample code是假设：
+本例子演示了如何在trueStudio IDE中对嵌入式设备（NUCLEO-F103RB, 以及NUCLEO-F411RE  board）编写UT，本例子的sample code是假设：
 CppUTest source放置C:\prog\cpputest-3.8， 生成的libCppUTest.a放在C:\prog\cpputest-3.8\lib4nucleof103
 
 下面将各个涉及步骤说明如下。 本demo参考了[搭配Atollic TrueSTUDIO尝试CppUTest](https://qiita.com/tk23ohtani/items/1f1cc4b9fa58a04f520c)
@@ -17,12 +17,11 @@ the first step was to build a library libCppUTest.a
 2. create a new static library in Atollic
 3. file -> new -> c++ project -> static library -> embedded c++ library  using atollic ARM tools toolchains
 4. select your target hardware ( e.g. nucleo-F103RB BOARD)
-5. at same above UI, uncheck "disable c++ exception handlling" 
+5. option for stm32 F4xx, at same above UI, uncheck "disable c++ exception handlling" 
 6. at next UI  uncheck release version, we only need debug version
-7. from cpputest root directory, import src/CppUTest and src/CppUTestExt to your library's src folder
-8. from cpputest root directory, import src/Platforms/lar  to your library's src folder
+7. from cpputest root directory, import src/CppUTest , src/CppUTestExt and src/Platforms/lar  
 9. option: if select platforms/gcc, open the UtestPlatform.cpp you have just copied and substitute the lines 259-288 with lines 198-218 from src/Platforms/Keil/UtestPlatform.cpp (this make all mutex functions justdummies)   ----> or using lar's version
-10. option:in your library's src folder edit IEEE754ExceptionsPlugin.cpp line 31 so it looks like this: `#ifdef CPPUTEST_USE_FENV ` (this turns off support for floating-point enviroment)
+10. option for stm32 F4xx, in your library's src folder edit IEEE754ExceptionsPlugin.cpp line 31 so it looks like this: `#ifdef CPPUTEST_USE_FENV ` (this turns off support for floating-point enviroment)
 11. c/c++ build -> settings -> tool settings -> c++ compiler -> directories -> add `[CppUtestRoot]/include`
 12. c/c++ build -> settings -> tool settings -> c++ compiler -> symbols -> add `CPPUTEST_STD_CPP_LIB_DISABLED`, `CPPUTEST_MEM_LEAK_DETECTION_DISABLED`
 13. c/c++ build -> settings -> tool settings -> c++ compiler -> general -> c++ standard -> gnu++98
@@ -36,14 +35,14 @@ now to crate a test project
 2. select your target hardware ( e.g. nucleo-F103RB BOARD). it should match to libcpputest.a's target hardware, 
    如果是类似F4xx， RAM比较大的，建议选择RUN IN RAM.因为目的是TDD，则应经常对其进行测试，而对类似nucleof103RB板子，只有20KBRAM， 一个最基本带TEST的application都要编译到62KB，所以103板子在UTEST情况下玩RAM不合适。
    
-3. uncheck "disable c++ exception handlling"
+3. option for stm32 F4xx, uncheck "disable c++ exception handlling", select "disable RTTI"
 4. check generate system calls file (enable I/O..)
 5. select your debugging tool (st-link in my case)
 6. uncheck release 
 7. c/c++ build -> settings -> tool settings -> c++ compiler -> directories -> add `[CppUtestRoot]/include`
-8. c/c++ build -> settings -> tool settings -> c++ linker -> library search path -> `path_to_libCppUTest.a` 
+8. c/c++ build -> settings -> tool settings -> c++ compiler -> symbols -> add `CPPUTEST_STD_CPP_LIB_DISABLED`,  `CPPUTEST_MEM_LEAK_DETECTION_DISABLED` 
 9.  c/c++ build -> settings -> tool settings -> c++ linker -> libraries -> add  CppUTest (is "libCppUTest.a")
-10. c/c++ build -> settings -> tool settings -> c++ compiler -> symbols -> add `CPPUTEST_STD_CPP_LIB_DISABLED`, `CPPUTEST_STD_C_LIB_DISABLED`, `CPPUTEST_MEM_LEAK_DETECTION_DISABLED`
+10. c/c++ build -> settings -> tool settings -> c++ linker -> library search path -> `path_to_libCppUTest.a`
 11. add `#include` for your peripheral access layer into syscalls.c (stm32f10x in my case)
 12. in syscalls.c change the body of _write to this (to handle console output)
     ```c
@@ -86,7 +85,7 @@ now to crate a test project
     }
     ```
 19. start debug session
-20. enable ITM port 0 in your SWV console, start tracing and resume run the debug. notes, nucleo-f103rb is 64Mhz, nucleo-f4 is 168Mhz
+20. enable ITM port 0 in your SWV console, start tracing and resume run the debug. notes： nucleo-f103rb is core clock 64Mhz and SWO clock 1000k, nucleo-f4 is is core clock 100Mhz and SWO clock 1000k
 21. you should get follwing ouput in your SWV console, start tracing and run the debug
 ```text
 ..\src\test.cpp:16: error: Failure in TEST(FirstTestGroup, FirstTest)
